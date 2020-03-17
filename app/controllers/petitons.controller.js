@@ -2,12 +2,12 @@ const user = require('../models/petition.models');
 
 exports.list = async function( req, res ) {
     console.log( '\nRequest to list petitions...' );
-    const startIndex = req.param.startIndex;
-    const count = req.param.count;
-    const q = req.param.q;
-    const categoryId = req.param.categoryId;
-    const authorId = req.param.authorId;
-    const sortBy = req.param.sortBy;
+    const startIndex = req.params.startIndex;
+    const count = req.params.count;
+    const q = req.params.q;
+    const categoryId = req.params.categoryId;
+    const authorId = req.params.authorId;
+    const sortBy = req.params.sortBy;
     try {
         const result = await user.getAll();
         res.status( 200 )

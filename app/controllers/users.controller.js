@@ -31,7 +31,7 @@ exports.register = async function( req, res ) {
         }
     } catch( err ) {
         res.status( 500 )
-            .send( `ERROR creating user ${ err }` );
+            .send( "Internal Server Error");
     }
 };
 
@@ -48,16 +48,44 @@ exports.login = async function(req, res){
             .send(result);
     } catch(err) {
         res.status(500)
-            .send("Error logging in");
+            .send("Internal Server Error");
     }
 };
 
 exports.logout = async function(req, res){
-    return null;
+    try {
+        const auth_token = req.headers['x-authorization'];
+        const result = await user.logout(auth_token);
+        if (result == true) {
+            res.status(400)
+                .send("Unauthorised")
+        }
+        res.status(200)
+            .send("Logged out yeet");
+        } catch (err) {
+            res.status(500)
+                .send("Internal Server Error");
+    }
 };
 
 exports.retrieve = async function(req, res){
-    return null;
+    try {
+        const auth_token = req.headers['x-authorisation'];
+        const user_id = req.params.id;
+        const result = await user.retrieve(user_id, auth_token);
+        console.log(result);
+        if (result != null) {
+            res.status(200)
+                .send(result[0][0]);
+        }
+        else {
+            res.status(404)
+                .send("Not found")
+        }
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error")
+    }
 };
 
 exports.update = async function(req, res){

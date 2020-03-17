@@ -32,12 +32,32 @@ exports.login = async function(email, password){
     return return_vals;
 };
 
-exports.logout = async function() {
-    return null
+exports.logout = async function(token) {
+    const conn = await db.getPool().getConnection();
+    const update = 'update User set auth_token = null where auth_token = ?';
+    const updated = await conn.query(update, [token]);;
+    if (updated[0].affectedRows == 0) {
+        return true;
+    }
+    conn.release();
+    return updated;
 };
 
-exports.retrieve = async function(){
-    return null;
+exports.retrieve = async function(user_id, token){
+    const conn = await db.getPool().getConnection();
+    const select = 'select auth_token from User where user_id = ?';
+    const checking = await conn.query(select, [user_id]);
+    if (checking[0][0].auth_token == token && token != undefined) {
+        const check = 'select name, city, country, email from User where user_id = ? and auth_token = ?'
+        const checked = await conn.query(check, [user_id, token]);
+        return checked;
+    }
+    else {
+        const check = 'select name, city, country from User where user_id = ?';
+        const checked = await conn.query(check, [user_id]);
+        return checked;
+    }
+    conn.release();
 };
 
 exports.update = async function() {
