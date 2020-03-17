@@ -1,4 +1,4 @@
-const user = require('../models/petitions.model');
+const user = require('../models/petition.models');
 
 exports.list = async function( req, res ) {
     console.log( '\nRequest to list petitions...' );

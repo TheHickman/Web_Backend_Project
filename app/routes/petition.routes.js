@@ -1,4 +1,4 @@
-const users = require( '../controllers/user.server.controller' );
+const petitions = require( '../controllers/petitons.controller' );
 module.exports = function( app ) {
     app.route(app.rootUrl + '/petitions' )
         .get( petitions.list )

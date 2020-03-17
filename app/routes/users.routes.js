@@ -1,6 +1,6 @@
-const users = require( '../controllers/user.controller' );
+const users = require( '../controllers/users.controller' );
 module.exports = function (app) {
-    app.route(app.rootUrl + '/users')
+    app.route(app.rootUrl + '/users/register')
         .post(users.register);
 
     app.route(app.rootUrl + '/users/login')
@@ -10,6 +10,6 @@ module.exports = function (app) {
         .post(users.logout);
 
     app.route(app.rootUrl + '/users/:Id')
-        .get(users.read)
+        .get(users.retrieve)
         .patch(users.update);
 };
