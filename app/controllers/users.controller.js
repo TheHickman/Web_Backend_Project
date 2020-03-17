@@ -36,7 +36,20 @@ exports.register = async function( req, res ) {
 };
 
 exports.login = async function(req, res){
-    return null;
+    try {
+        const email = req.body.email;
+        const password = req.body.password;
+        const result = await user.login(email, password);
+        if (result === false) {
+            res.status(400)
+                .send("Invaid Email or Password");
+        }
+        res.status(200)
+            .send(result);
+    } catch(err) {
+        res.status(500)
+            .send("Error logging in");
+    }
 };
 
 exports.logout = async function(req, res){

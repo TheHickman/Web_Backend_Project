@@ -17,8 +17,19 @@ exports.register= async function( name, email, password, city, country ) {
     }
 };
 
-exports.login = async function(){
-    return null;
+exports.login = async function(email, password){
+    const token = crypto.randomBytes(16).toString('hex');
+    const conn = await db.getPool().getConnection();
+    const updating = 'update User set auth_token = ? where email = ? and password = ?';
+    const updated = await conn.query(updating, [token, email, password]);
+    if (updated[0].affectedRows === 0) {
+        return false;
+    }
+    const authorised = 'select user_id, auth_token from User where auth_token = ?';
+    const answer = await conn.query(authorised, [token]);
+    conn.release;
+    return_vals = answer[0][0]
+    return return_vals;
 };
 
 exports.logout = async function() {
