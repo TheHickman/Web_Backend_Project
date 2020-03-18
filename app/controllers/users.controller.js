@@ -19,18 +19,18 @@ exports.register = async function( req, res ) {
             res.status(400)
                 .send("Password len cannot be nothing");
         }
-        if (name.length === 0) {
+        if (name == null) {
             res.status(400)
-                .send("Name missing");
+                .send("Name len is 0");
         }
         const result = await user.register(name, email, password, city, country  );
-        if (result === true) {
+        if (result == true) {
             res.status(400)
                 .send("Email already in use");
         }
         else {
             res.status(201)
-                .send({"userid": result});
+                .send({"userId": result});
         }
     } catch( err ) {
         res.status( 500 )
@@ -76,7 +76,7 @@ exports.retrieve = async function(req, res){
         const auth_token = req.headers['x-authorisation'];
         const user_id = req.params.id;
         const result = await user.retrieve(user_id, auth_token);
-        if (result != null) {
+        if (result != false) {
             res.status(200)
                 .send(result[0][0]);
         }
@@ -92,14 +92,45 @@ exports.retrieve = async function(req, res){
 
 exports.update = async function(req, res){
     try {
-        const auth_token = req.headers['x-authorisation'];
-        const current_password = req.params.currentPassword;
+        const auth_token = req.headers['x-authorization'];
         const user_id = req.params.id;
-        const new_password = req.params.password;
-        const city = req.params.city;
-        const country = req.params.country;
-
-        const result = await user.retrieve(auth_token, user_id, current_password, new_password);
+        const name = req.body.name;
+        const email = req.body.email;
+        const password = req.body.currentPassword;
+        const new_password = req.body.password;
+        const city = req.body.city;
+        const country = req.body.country;
+        if (name == null && email == null && new_password == null && city == null && country == null) {
+            res.status(400)
+                .send("No changes");
+        }
+        if (password == null || new_password == null) {
+            res.status(400)
+                .send("No password");
+        }
+        if (email != null && email.indexOf("@") == -1) {
+            res.status(400)
+                .send("Invalid email");
+        }
+        if (auth_token == null) {
+            res.status(400)
+                .send("Toekn is invalid");
+        }
+        const result = await user.update(auth_token, user_id, name, email, password, new_password, city, country);
+        if (result == false) {
+            res.status(401)
+                .send("Not allowed");
+        }
+        if (result == 3) {
+            res.status(403)
+                .send("Wrong user");
+        }
+        if (result == 402) {
+            res.status(400)
+                .send("Email in use");
+        }
+        res.status(200)
+            .send("OK");
     } catch (err) {
         res.status(500)
             .send("Internal Server Error")
