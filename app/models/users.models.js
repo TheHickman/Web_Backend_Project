@@ -60,6 +60,6 @@ exports.retrieve = async function(user_id, token){
     conn.release();
 };
 
-exports.update = async function() {
-    return null;
+exports.update = async function(id, password, new_password) {
+    const conn = await db.getPool().getConnection();
 };

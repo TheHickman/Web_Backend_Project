@@ -19,14 +19,17 @@ exports.register = async function( req, res ) {
             res.status(400)
                 .send("Password len cannot be nothing");
         }
+        if (name.length === 0) {
+            res.status(400)
+                .send("Name missing");
+        }
         const result = await user.register(name, email, password, city, country  );
-        console.log(result);
         if (result === true) {
             res.status(400)
                 .send("Email already in use");
         }
         else {
-            res.status(200)
+            res.status(201)
                 .send({"userid": result});
         }
     } catch( err ) {
@@ -57,7 +60,7 @@ exports.logout = async function(req, res){
         const auth_token = req.headers['x-authorization'];
         const result = await user.logout(auth_token);
         if (result == true) {
-            res.status(400)
+            res.status(401)
                 .send("Unauthorised")
         }
         res.status(200)
@@ -73,7 +76,6 @@ exports.retrieve = async function(req, res){
         const auth_token = req.headers['x-authorisation'];
         const user_id = req.params.id;
         const result = await user.retrieve(user_id, auth_token);
-        console.log(result);
         if (result != null) {
             res.status(200)
                 .send(result[0][0]);
@@ -89,5 +91,14 @@ exports.retrieve = async function(req, res){
 };
 
 exports.update = async function(req, res){
-    return null;
+    try {
+        const auth_token = req.headers['x-authorisation'];
+        const current_password = req.params.currentPassword;
+        const user_id = req.params.id;
+        const new_password = req.params.password;
+        const result = await user.retrieve(auth_token, user_id, current_password, new_password);
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error")
+    }
 };
