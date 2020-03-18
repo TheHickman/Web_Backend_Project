@@ -113,7 +113,7 @@ exports.update = async function(req, res){
                 .send("Invalid email");
         }
         if (auth_token == null) {
-            res.status(400)
+            res.status(401)
                 .send("Toekn is invalid");
         }
         const result = await user.update(auth_token, user_id, name, email, password, new_password, city, country);
@@ -121,13 +121,13 @@ exports.update = async function(req, res){
             res.status(401)
                 .send("Not allowed");
         }
+        if (result == 2) {
+            res.status(400)
+                .send("Email in use");
+        }
         if (result == 3) {
             res.status(403)
                 .send("Wrong user");
-        }
-        if (result == 402) {
-            res.status(400)
-                .send("Email in use");
         }
         res.status(200)
             .send("OK");

@@ -66,16 +66,10 @@ exports.retrieve = async function(user_id, token){
 
 exports.update = async function(auth_token, user_id, name, email, password, new_password, city, country) {
     const conn = await db.getPool().getConnection();
-    const test = 'select * from User where auth_token = ?';
-    const result = await conn.query(test, [auth_token]);
-    const old_name = result[0][0].name;
-    const old_email = result[0][0].email;
-    const old_city = result[0][0].city;
-    const old_country = result[0][0].country;
     const email_test = 'select * from User where email = ?';
     const test_result = await conn.query(email_test, [email]);
     if (test_result[0].length != 0) {
-        return 402;
+        return 2;
     }
     const select = 'select auth_token from User where user_id = ? and password = ?';
     const checking = await conn.query(select, [user_id, password]);
@@ -92,8 +86,16 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
         console.log(user_result[0][0].user_id);
         return 3;
     }
-    const up_dog = 'update User set name = IfNull(?, ?), password = IfNull(?, ?), email = IfNull(?, ?), city = IfNull(?, ?), country = IfNull(?, ?) where auth_token = ?';
-    const updated = await conn.query(up_dog, [name, old_name, new_password, password, email, old_email, city, old_city, country, old_country, auth_token]);
-    return 1;
+    else {
+        const test = 'select * from User where auth_token = ?';
+        const result = await conn.query(test, [auth_token]);
+        const old_name = result[0][0].name;
+        const old_email = result[0][0].email;
+        const old_city = result[0][0].city;
+        const old_country = result[0][0].country;
+        const up_dog = 'update User set name = IfNull(?, ?), password = IfNull(?, ?), email = IfNull(?, ?), city = IfNull(?, ?), country = IfNull(?, ?) where auth_token = ?';
+        const updated = await conn.query(up_dog, [name, old_name, new_password, password, email, old_email, city, old_city, country, old_country, auth_token]);
+        return 1;
+    }
     conn.release();
 };
