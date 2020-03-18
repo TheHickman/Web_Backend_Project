@@ -1,7 +1,7 @@
 const db = require('../../config/db');
 
 
-exports.getAll = async function( ) {
+exports.list = async function(q, categoryId, authorId, sortBy) {
     console.log( 'Request to get all petitions from the database...' );
     const conn = await db.getPool().getConnection();
     const query = 'select Signature.petition_id as petitionId, title, Category.name as category, User.name as authorName, count(Signature.petition_id) as signatureCount from Signature JOIN Petition on Signature.petition_id = Petition.petition_id JOIN Category on Petition.category_id = Category.category_id JOIN User on Petition.author_id = User.user_id group by Signature.petition_id order by signatureCount desc;'

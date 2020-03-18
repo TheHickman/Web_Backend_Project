@@ -1,17 +1,17 @@
-const user = require('../models/petition.models');
+const petitions = require('../models/petition.models');
 
-exports.list = async function( req, res ) {
-    console.log( '\nRequest to list petitions...' );
-    const startIndex = req.params.startIndex;
+exports.lister = async function( req, res ) {
+    console.log("Here")
+    const start_index = req.params.startIndex;
     const count = req.params.count;
     const q = req.params.q;
     const categoryId = req.params.categoryId;
     const authorId = req.params.authorId;
     const sortBy = req.params.sortBy;
     try {
-        const result = await user.getAll();
+        const result = await petitions.list(q, categoryId, authorId, sortBy);
         res.status( 200 )
-            .send( result );
+            .send(result);
     } catch( err ) {
         res.status( 500 )
             .send( `ERROR getting users ${ err }` );
