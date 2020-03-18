@@ -96,6 +96,9 @@ exports.update = async function(req, res){
         const current_password = req.params.currentPassword;
         const user_id = req.params.id;
         const new_password = req.params.password;
+        const city = req.params.city;
+        const country = req.params.country;
+
         const result = await user.retrieve(auth_token, user_id, current_password, new_password);
     } catch (err) {
         res.status(500)
