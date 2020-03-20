@@ -83,11 +83,11 @@ exports.create = async function(req, res){
                 .send("NoNoNo");
         }
     }
-    const createdDate = now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23);
+    const created_date = now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23);
     try {
         const auth_token = req.headers['x-authorization'];
-        const result = await petitions.insert(auth_token, title, description, categoryId, createdDate, closingDate);
-        if (result == false) {
+        const result = await petitions.insert(auth_token, title, description, categoryId, created_date, closingDate);
+        if (result == 66) {
             res.status(401)
                 .send("Wrong user");
         }
@@ -98,6 +98,8 @@ exports.create = async function(req, res){
             .send("Internal Server Error");
     }
 };
+
+
 exports.read = async function(req, res){
     const pet_id = req.params.id;
     try {
@@ -116,11 +118,93 @@ exports.read = async function(req, res){
     }
 };
 exports.update = async function(req, res){
-    return null;
+    const auth_token = req.headers['x-authorization'];
+    if (auth_token == null) {
+        res.status(401)
+            .send("Toekn is invalid");
+    }
+    let now = new Date();
+    const pet_id = req.params.id;
+    const title = req.body.title;
+    const description = req.body.description;
+    const categoryId = req.body.categoryId;
+    const closingDate = req.body.closingDate;
+    if (title == null && description == null && categoryId == null && closingDate == null) {
+        res.status(400)
+            .send("No changes");
+    }
+    if (closingDate != null) {
+        let date = new Date(closingDate);
+        if (date < now) {
+            res.status(400)
+                .send("NoNoNo");
+        }
+    }
+    if (categoryId != null) {
+        if (categoryId > 7 || categoryId < 0 || categoryId.length == 0 || isNaN(categoryId)) {
+            res.status(400)
+                .send();
+        }
+    }
+    try {
+        const result = await petitions.alter(pet_id, auth_token, title, description, categoryId, closingDate);
+        if (result == "Not allowed") {
+            res.status(400)
+                .send("Future");
+        }
+        if (result == "Token bad") {
+            res.status(401)
+                .send("No");
+        }
+        if (result == "Not yours") {
+            res.status(403)
+                .send("Not your petition");
+        }
+        if (result == "Not found") {
+            res.status(404)
+                .send("Petition not found");
+        }
+        res.status(200)
+            .send();
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error");
+    }
+
 };
+
 exports.delete = async function(req, res){
-    return null;
+    const pet_id = req.params.id;
+    const auth_token = req.headers['x-authorization'];
+    try {
+        const result = await petitions.remove(pet_id, auth_token);
+        if (result == "Token bad") {
+            res.status(401)
+                .send("Unauthorised");
+        }
+        if (result == "Not yours") {
+            res.status(403)
+                .send("Forbidden");
+        }
+        if (result == "Not found") {
+            res.status(404)
+                .send("Not found");
+        }
+        res.status(200)
+            .send();
+    } catch (err) {
+        res.status(500)
+            .send();
+    }
 };
-exports.list = async function(req, res){
-    return null;
+
+exports.getCatInfo = async function(req, res){
+    try {
+        const result = await petitions.listcats();
+        res.status(200)
+            .send(result);
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error");
+    }
 };
