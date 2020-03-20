@@ -61,7 +61,42 @@ exports.lister = async function( req, res ) {
 };
 
 exports.create = async function(req, res){
-    return null;
+    const title = req.body.title;
+    const description = req.body.description;
+    const categoryId = req.body.categoryId;
+    const closingDate = req.body.closingDate;
+    if (title == null|| categoryId == null || description == null || closingDate == null) {
+        res.status(400)
+            .send();
+    }
+    if (categoryId != null) {
+        if (categoryId > 7 || categoryId < 0 || categoryId.length == 0 || isNaN(categoryId)) {
+            res.status(400)
+                .send();
+        }
+    }
+    let now = new Date();
+    if (closingDate != null) {
+        let date = new Date(closingDate);
+        if (date < now || isNaN(date)) {
+            res.status(400)
+                .send("NoNoNo");
+        }
+    }
+    const createdDate = now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23);
+    try {
+        const auth_token = req.headers['x-authorization'];
+        const result = await petitions.insert(auth_token, title, description, categoryId, createdDate, closingDate);
+        if (result == false) {
+            res.status(401)
+                .send("Wrong user");
+        }
+        res.status(201)
+            .send({"petitionId" : result});
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error");
+    }
 };
 exports.read = async function(req, res){
     const pet_id = req.params.id;

@@ -39,12 +39,16 @@ exports.list = async function(q, categoryId, authorId, sortBy) {
     return rows;
 };
 
-exports.insert = async function( petition ) {
+exports.insert = async function(auth_token, title, description, categoryId, createdDate, closingDate) {
     const conn = await db.getPool().getConnection();
-    const query = 'insert into Petition (pettion) values ( ? )';
-    const [ result ] = await conn.query( query, [ pettion ] );
-    conn.release();
-    return result;
+    const query = 'select user_id from User where auth_token = ?';
+    const user_table = await conn.query( query, [auth_token] );
+    if (user_table[0].length == 0) {
+        return false;
+    }
+    const insertion = "insert into Petition (author_id, category_id, closing_date, created_date, description, title)  VALUES (?, ?, ?, ?, ?, ?)";
+    const result = await conn.query(insertion, [user_table[0][0].user_id, categoryId, closingDate, createdDate, description, title]);
+    return result[0].insertId;
 };
 
 exports.read = async function(pet_id) {
