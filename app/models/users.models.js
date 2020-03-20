@@ -6,6 +6,7 @@ exports.register= async function( name, email, password, city, country ) {
     const test = 'select * from User where email = ?';
     const test_result = await conn.query(test, [email]);
     if (test_result[0].length != 0) {
+        conn.release();
         return true;
     }
     else {
@@ -22,6 +23,7 @@ exports.login = async function(email, password){
     const updating = 'update User set auth_token = ? where email = ? and password = ?';
     const updated = await conn.query(updating, [token, email, password]);
     if (updated[0].affectedRows === 0) {
+        conn.release();
         return false;
     }
     const authorised = 'select user_id as userId, auth_token as token from User where auth_token = ?';
@@ -36,6 +38,7 @@ exports.logout = async function(token) {
     const update = 'update User set auth_token = null where auth_token = ?';
     const updated = await conn.query(update, [token]);;
     if (updated[0].affectedRows == 0) {
+        conn.release();
         return true;
     }
     conn.release();
@@ -47,6 +50,7 @@ exports.retrieve = async function(user_id, token){
     const exists = 'select * from User where user_id = ?';
     const doesnt = await conn.query(exists, [user_id]);
     if (doesnt[0].length == 0) {
+        conn.release();
         return doesnt[0];
     }
     const select = 'select auth_token from User where user_id = ?';
@@ -54,11 +58,13 @@ exports.retrieve = async function(user_id, token){
     if (checking[0][0].auth_token == token && token != undefined) {
         const check = 'select name, city, country, email from User where user_id = ? and auth_token = ?'
         const checked = await conn.query(check, [user_id, token]);
+        conn.release();
         return checked;
     }
     else {
         const check = 'select name, city, country from User where user_id = ?';
         const checked = await conn.query(check, [user_id]);
+        conn.release();
         return checked;
     }
     conn.release();
@@ -69,21 +75,24 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
     const email_test = 'select * from User where email = ?';
     const test_result = await conn.query(email_test, [email]);
     if (test_result[0].length != 0) {
+        conn.release();
         return 2;
     }
     const select = 'select auth_token from User where user_id = ? and password = ?';
     const checking = await conn.query(select, [user_id, password]);
     if (checking[0].length == 0) {
+        conn.release();
         return false;
     }
     if (checking[0][0].auth_token != auth_token) {
+        conn.release();
         return false;
     }
 
     const correct_user = 'select user_id from User where auth_token = ?';
     const user_result = await conn.query(correct_user, [auth_token]);
     if (user_result[0][0].user_id != user_id) {
-        console.log(user_result[0][0].user_id);
+        conn.release();
         return 3;
     }
     else {
@@ -95,6 +104,7 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
         const old_country = result[0][0].country;
         const up_dog = 'update User set name = IfNull(?, ?), password = IfNull(?, ?), email = IfNull(?, ?), city = IfNull(?, ?), country = IfNull(?, ?) where auth_token = ?';
         const updated = await conn.query(up_dog, [name, old_name, new_password, password, email, old_email, city, old_city, country, old_country, auth_token]);
+        conn.release();
         return 1;
     }
     conn.release();
