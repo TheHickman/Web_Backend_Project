@@ -172,10 +172,8 @@ exports.postSigs = async function(auth_token, pet_id) {
         conn.release();
         return 403;
     }
-    const signed_date = now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23);
     const insertion = 'insert into Signature (petition_id, signatory_id, signed_date) VALUES (?, ?, ?)';
-    const has_inserted = await conn.query(insertion, [pet_id, user_id, signed_date]);
-    console.log(has_inserted[0]);
+    const has_inserted = await conn.query(insertion, [pet_id, user_id, now]);
     conn.release();
     return true;
 };
@@ -219,4 +217,17 @@ exports.removeSigs = async function(auth_token, pet_id) {
     const is_delete = await conn.query(deletion, [user_id, pet_id]);
     conn.release();
     return 200;
+};
+
+exports.getPhoto = async function(pet_id) {
+    const conn = await db.getPool().getConnection();
+    const query = 'select photo_filename from Petition where petition_id = ?';
+    const result = await conn.query(query, [pet_id]);
+    if (result[0].length == 0) {
+        conn.release();
+        return 404;
+    }
+    const filename = result[0][0].photo_filename;
+    conn.release();
+    return filename;
 };

@@ -13,4 +13,7 @@ module.exports = function( app ) {
         .get(petitions.getSigs)
         .post(petitions.postSigs)
         .delete(petitions.removeSigs);
+    app.route(app.rootUrl + '/petitions/:id/photo')
+        .get(petitions.getPhoto)
+        .put(petitions.putPhoto);
 };

@@ -1,4 +1,5 @@
 const petitions = require('../models/petition.models');
+const fs = require('mz/fs')
 
 exports.lister = async function( req, res ) {
     const q = req.query.q;
@@ -83,10 +84,9 @@ exports.create = async function(req, res){
                 .send("NoNoNo");
         }
     }
-    const created_date = now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23);
     try {
         const auth_token = req.headers['x-authorization'];
-        const result = await petitions.insert(auth_token, title, description, categoryId, created_date, closingDate);
+        const result = await petitions.insert(auth_token, title, description, categoryId, now, closingDate);
         if (result == 66) {
             res.status(401)
                 .send("Wrong user");
@@ -280,3 +280,30 @@ exports.removeSigs = async function(req, res) {
             .send("Internal Server Error");
     }
 };
+
+exports.getPhoto = async function (req, res) {
+    const pet_id = req.params.id;
+    try {
+        const result = await petitions.getPhoto(pet_id);
+        if (result == 404) {
+            res.status(404)
+                .send("Not found");
+        }
+        if (await fs.exists('../../storage/photos/' + result)) {
+            console.log("uwu");
+            const image = await fs.readFile('../../storage/photos' + result);
+            const mimeType = tools.getImageMimetype(result);
+            return {image, mimeType};
+        }
+        res.status(200)
+            .contentType(imageDetails.mimeType).send(imageDetails.image);
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error");
+    }
+};
+
+exports.putPhoto = async function(req, res) {
+    console.log("here");
+    return null;
+}
