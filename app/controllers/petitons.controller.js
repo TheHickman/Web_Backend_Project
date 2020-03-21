@@ -208,3 +208,75 @@ exports.getCatInfo = async function(req, res){
             .send("Internal Server Error");
     }
 };
+
+exports.getSigs = async function(req, res) {
+    const pet_id = req.params.id;
+    try {
+        const result = await petitions.getSigs(pet_id);
+        if (result.length == 0) {
+            res.status(404)
+                .send("Petition not found");
+        }
+        res.status(200)
+            .send(result);
+
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error")
+    }
+};
+
+exports.postSigs = async function(req, res) {
+    const auth_token = req.headers['x-authorization'];
+    const pet_id = req.params.id;
+    try {
+        const result = await petitions.postSigs(auth_token, pet_id);
+        if (result == 401) {
+            res.status(401)
+                .send("Unauthorised");
+        }
+        if (result == 403) {
+            res.status(403)
+                .send("Forbidden");
+        }
+        if (result == 404) {
+            res.status(404)
+                .send("Not found");
+        }
+        if (result == true) {
+            res.status(201)
+                .send("Created");
+        }
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error");
+    }
+    return null;
+};
+
+exports.removeSigs = async function(req, res) {
+    const auth_token = req.headers['x-authorization'];
+    const pet_id = req.params.id;
+    try {
+        const result = await petitions.removeSigs(auth_token, pet_id);
+        if (result == 200) {
+            res.status(200)
+                .send("OK");
+        }
+        if (result == 401) {
+            res.status(401)
+                .send("Unauthorised");
+        }
+        if (result == 403) {
+            res.status(403)
+                .send("forbidden");
+        }
+        if (result == 404) {
+            res.status(404)
+                .send("Not fund");
+        }
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error");
+    }
+};

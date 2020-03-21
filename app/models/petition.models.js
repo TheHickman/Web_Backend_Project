@@ -135,3 +135,88 @@ exports.listcats = async function() {
     conn.release();
     return result[0];
 };
+
+exports.getSigs = async function(pet_id) {
+    const conn = await db.getPool().getConnection();
+    const query = "select signatory_id as signatoryId, User.name as name, User.city as city, User.country as country, signed_date as signedDate from Signature JOIN User on Signature.signatory_id = User.user_id where petition_id = ? order by signedDate asc";
+    const result = await conn.query(query, [pet_id]);
+    conn.release();
+    return result[0];
+};
+
+exports.postSigs = async function(auth_token, pet_id) {
+    const conn = await db.getPool().getConnection();
+    const exists = 'select * from Petition where petition_id = ?';
+    const does_it = await conn.query(exists, [pet_id]);
+    if (does_it[0].length == 0) {
+        conn.release();
+        return 404;
+    }
+    const closed = 'select closing_date from Petition where petition_id = ?';
+    const is_closed = await conn.query(closed, [pet_id]);
+    const closing_date = is_closed[0][0].closing_date;
+    let now = new Date();
+    if (closing_date <= now) {
+        return 403
+    }
+    const is_logged = 'select user_id from User where auth_token = ?';
+    const user_table = await conn.query(is_logged, [auth_token]);
+    if (user_table[0].length == 0) {
+        conn.release();
+        return 401;
+    }
+    const user_id = user_table[0][0].user_id;
+    const has_signed = 'select signatory_id from Signature where signatory_id = ? and petition_id = ?';
+    const have_you = await conn.query(has_signed, [user_id, pet_id]);
+    if (have_you[0].length != 0) {
+        conn.release();
+        return 403;
+    }
+    const signed_date = now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23);
+    const insertion = 'insert into Signature (petition_id, signatory_id, signed_date) VALUES (?, ?, ?)';
+    const has_inserted = await conn.query(insertion, [pet_id, user_id, signed_date]);
+    console.log(has_inserted[0]);
+    conn.release();
+    return true;
+};
+
+exports.removeSigs = async function(auth_token, pet_id) {
+    const conn = await db.getPool().getConnection();
+    const exists = 'select * from Petition where petition_id = ?';
+    const does_it = await conn.query(exists, [pet_id]);
+    if (does_it[0].length == 0) {
+        conn.release();
+        return 404;
+    }
+    const is_logged = 'select user_id from User where auth_token = ?';
+    const user_table = await conn.query(is_logged, [auth_token]);
+    if (user_table[0].length == 0) {
+        conn.release();
+        return 401;
+    }
+    const user_id = user_table[0][0].user_id;
+    const is_author = 'select author_id, petition_id from Petition where author_id = ? and petition_id = ?';
+    const authored = await conn.query(is_author, [user_id, pet_id]);
+    if (authored[0].length != 0) {
+        conn.release();
+        return 403;
+    }
+    const has_signed = 'select signatory_id from Signature where signatory_id = ? and petition_id = ?';
+    const have_you = await conn.query(has_signed, [user_id, pet_id]);
+    if (have_you[0].length == 0) {
+        conn.release();
+        return 403;
+    }
+    const closed = 'select closing_date from Petition where petition_id = ?';
+    const is_closed = await conn.query(closed, [pet_id]);
+    const closing_date = is_closed[0][0].closing_date;
+    let now = new Date();
+    if (closing_date <= now) {
+        conn.release();
+        return 403
+    }
+    const deletion = 'delete from Signature where signatory_id = ? and petition_id = ?';
+    const is_delete = await conn.query(deletion, [user_id, pet_id]);
+    conn.release();
+    return 200;
+};

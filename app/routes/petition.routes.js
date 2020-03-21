@@ -9,4 +9,8 @@ module.exports = function( app ) {
         .get( petitions.read )
         .patch( petitions.update )
         .delete( petitions.delete );
+    app.route(app.rootUrl + "/petitions/:id/signatures")
+        .get(petitions.getSigs)
+        .post(petitions.postSigs)
+        .delete(petitions.removeSigs);
 };
