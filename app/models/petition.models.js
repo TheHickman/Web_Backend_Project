@@ -231,3 +231,42 @@ exports.getPhoto = async function(pet_id) {
     conn.release();
     return filename;
 };
+
+exports.postPhoto = async function(auth_token, pet_id, file_name) {
+    const conn = await db.getPool().getConnection();
+    const exists = 'select * from Petition where petition_id = ?';
+    const does_it = await conn.query(exists, [pet_id]);
+    if (does_it[0].length == 0) {
+        conn.release();
+        return 404;
+    }
+    const is_logged = 'select user_id from User where auth_token = ?';
+    const user_table = await conn.query(is_logged, [auth_token]);
+    if (user_table[0].length == 0) {
+        conn.release();
+        return 401;
+    }
+    const user_id = user_table[0][0].user_id;
+    const is_author = 'select author_id, petition_id from Petition where author_id = ? and petition_id = ?';
+    const authored = await conn.query(is_author, [user_id, pet_id]);
+    if (authored[0].length == 0) {
+        conn.release();
+        return 403;
+    }
+    const photo_exists = 'select photo_filename from Petition where petition_id = ?';
+    const does_photo = await conn.query(photo_exists, [pet_id]);
+    if (does_photo[0].length == 0) {
+        console.log('here');
+        const create = 'update Petition set photo_filename = ? where petition_id = ?';
+        const replaced = await conn.query(replace, [file_name, pet_id])
+        conn.release();
+        return 201;
+    }
+    if (does_photo[0].length == 1) {
+        const create = 'update Petition set photo_filename = ? where petition_id = ?';
+        const created = await conn.query(create, [file_name, pet_id])
+        conn.release();
+        return 200;
+    }
+    conn.release();
+}

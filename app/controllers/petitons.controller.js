@@ -1,5 +1,7 @@
 const petitions = require('../models/petition.models');
 const fs = require('mz/fs')
+var mime = require('mime-types')
+const path = require('path')
 
 exports.lister = async function( req, res ) {
     const q = req.query.q;
@@ -289,14 +291,14 @@ exports.getPhoto = async function (req, res) {
             res.status(404)
                 .send("Not found");
         }
-        if (await fs.exists('../../storage/photos/' + result)) {
-            console.log("uwu");
-            const image = await fs.readFile('../../storage/photos' + result);
-            const mimeType = tools.getImageMimetype(result);
-            return {image, mimeType};
+        if (await fs.exists('./storage/photos/' + result)) {
+            const image = await fs.readFile('./storage/photos/' + result);
+            const mimeType = mime.lookup('./storage/photos/' + result)
+            console.log(mimeType);
+            const image_dict = {image, mimeType};
+            res.status(200)
+                .contentType(image_dict.mimeType).send(image_dict.image);
         }
-        res.status(200)
-            .contentType(imageDetails.mimeType).send(imageDetails.image);
     } catch (err) {
         res.status(500)
             .send("Internal Server Error");
@@ -304,6 +306,46 @@ exports.getPhoto = async function (req, res) {
 };
 
 exports.putPhoto = async function(req, res) {
-    console.log("here");
-    return null;
-}
+    const auth_token = req.headers['x-authorization'];
+    const pet_id = req.params.id;
+    const mime_type = req.headers['content-type'];
+    let extension = mime.extension(mime_type);
+    if (extension != 'jpeg' && extension != 'png' && extension != 'gif') {
+        res.status(400)
+            .send("bad requet");
+    }
+    if (extension == 'jpeg') {
+        extension = 'jpg';
+    }
+    try {
+        const file_name = pet_id + '.' + extension;
+        const result = await petitions.postPhoto(auth_token, pet_id, file_name);
+        if (result == 404) {
+            res.status(404)
+                .send("not found");
+        }
+        if (result == 403) {
+            res.status(403)
+                .send("Forbiden");
+        }
+        if (result == 401) {
+            res.status(401)
+                .send("Unauthorised")
+        }
+        if (result == 200 || result == 201) {
+            const file_path = path.dirname(require.main.filename) + '/storage/photos/';
+            req.pipe(fs.createWriteStream(file_path + file_name));
+            if (result == 200) {
+                res.status(200)
+                    .send("OK");
+            }
+            if (result == 201) {
+                res.status(201)
+                    .send("created");
+            }
+        }
+    } catch (err) {
+        res.status(500)
+            .send("Internal Server Error");
+    }
+};
