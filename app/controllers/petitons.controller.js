@@ -340,7 +340,7 @@ exports.putPhoto = async function(req, res) {
             const file_path = path.dirname(require.main.filename) + '/storage/photos/';
             const stream = fs.createWriteStream(file_path + file_name);
             req.pipe(stream);
-            strean.close();
+            stream.close();
             if (result == 200) {
                 res.status(200)
                     .send("OK");
