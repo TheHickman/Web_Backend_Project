@@ -295,6 +295,7 @@ exports.getPhoto = async function (req, res) {
             const image = await fs.readFile('./storage/photos/' + result);
             const mimeType = mime.lookup('./storage/photos/' + result)
             const image_dict = {image, mimeType};
+            image.close();
             res.status(200)
                 .contentType(image_dict.mimeType).send(image_dict.image);
         }
