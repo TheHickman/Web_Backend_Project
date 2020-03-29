@@ -294,10 +294,13 @@ exports.getPhoto = async function (req, res) {
         if (await fs.exists('./storage/photos/' + result)) {
             const image = await fs.readFile('./storage/photos/' + result);
             const mimeType = mime.lookup('./storage/photos/' + result)
-            console.log(mimeType);
             const image_dict = {image, mimeType};
             res.status(200)
                 .contentType(image_dict.mimeType).send(image_dict.image);
+        }
+        else {
+            res.status(404)
+                .send("Image file not in folder");
         }
     } catch (err) {
         res.status(500)
@@ -334,7 +337,9 @@ exports.putPhoto = async function(req, res) {
         }
         if (result == 200 || result == 201) {
             const file_path = path.dirname(require.main.filename) + '/storage/photos/';
-            req.pipe(fs.createWriteStream(file_path + file_name));
+            const stream = fs.createWriteStream(file_path + file_name);
+            req.pipe(stream);
+            strean.close();
             if (result == 200) {
                 res.status(200)
                     .send("OK");
