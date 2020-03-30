@@ -15,6 +15,7 @@ exports.register= async function( name, email, password, city, country ) {
         conn.release();
         return result.insertId;
     }
+    conn.release();
 };
 
 exports.login = async function(email, password){
@@ -108,4 +109,18 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
         return 1;
     }
     conn.release();
+};
+
+exports.getPhoto = async function(userId) {
+    const conn = await db.getPool().getConnection();
+    const file_name = 'select photo_filename from User where user_id = ?';
+    const process = await conn.query(file_name, [userId]);
+    if (process[0].length == 0) {
+        console.log('hey');
+        conn.release();
+        return 404;
+    }
+    const result = process[0][0].photo_filename;
+    conn.release();
+    return result;
 };

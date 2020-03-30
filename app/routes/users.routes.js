@@ -12,4 +12,8 @@ module.exports = function (app) {
     app.route(app.rootUrl + '/users/:id')
         .get(users.retrieve)
         .patch(users.update);
+    app.route(app.rootUrl + '/users/:id/photo')
+        .get(users.getPhoto)
+        .put(users.putPhoto)
+        .delete(users.deletePhoto);
 };

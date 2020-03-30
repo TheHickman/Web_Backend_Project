@@ -287,7 +287,7 @@ exports.getPhoto = async function (req, res) {
     const pet_id = req.params.id;
     try {
         const result = await petitions.getPhoto(pet_id);
-        if (result == 404) {
+        if (result == 404 || result == null) {
             res.status(404)
                 .send("Not found");
         }

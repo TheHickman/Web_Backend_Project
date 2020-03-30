@@ -1,5 +1,8 @@
 const user = require('../models/users.models');
 const crypto = require('crypto');
+const fs = require('mz/fs')
+var mime = require('mime-types')
+const path = require('path')
 
 const hash = crypto.randomBytes(16).toString('hex');
 
@@ -135,4 +138,40 @@ exports.update = async function(req, res){
         res.status(500)
             .send("Internal Server Error")
     }
+};
+
+exports.getPhoto = async function(req, res) {
+    try {
+        const user_id = req.params.id;
+        const result = await user.getPhoto(user_id);
+        console.log(result);
+        if (result == 404 || result == null) {
+            res.status(404)
+                .send("Cannot find");
+        }
+        if (await fs.exists('./storage/photos/' + result)) {
+            const image = await fs.readFile('./storage/photos/' + result);
+            const mimeType = mime.lookup('./storage/photos/' + result)
+            const image_dict = {image, mimeType};
+            res.status(200)
+                .contentType(image_dict.mimeType).send(image_dict.image);
+        }
+        else {
+            res.status(404)
+                .send("Image file not in folder");
+        }
+    } catch (err) {
+        res.status(500)
+            .send("Internal server error")
+    }
+};
+
+exports.putPhoto = async function(req, res) {
+    console.log("xd");
+    return null;
+};
+
+exports.deletePhoto = async function(req, res) {
+    console.log("xd");
+    return null;
 };
