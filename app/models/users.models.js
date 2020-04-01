@@ -139,6 +139,10 @@ exports.putPhoto = async function(userId, auth_token, file_name) {
     }
     const correct_user = 'select user_id from User where auth_token = ?';
     const user_result = await conn.query(correct_user, [auth_token]);
+    if (user_result[0].length == 0) {
+        conn.release();
+        return 401;
+    }
     if (user_result[0][0].user_id != userId) {
         conn.release();
         return 403;
@@ -176,6 +180,10 @@ exports.removePhoto = async function(userId, auth_token) {
     }
     const correct_user = 'select user_id from User where auth_token = ?';
     const user_result = await conn.query(correct_user, [auth_token]);
+    if (user_result[0].length == 0) {
+        conn.release();
+        return 401;
+    }
     if (user_result[0][0].user_id != userId) {
         conn.release();
         return 403;
