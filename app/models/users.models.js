@@ -137,13 +137,13 @@ exports.putPhoto = async function(userId, auth_token, file_name) {
     const user_result = await conn.query(correct_user, [auth_token]);
     if (user_result[0][0].user_id != userId) {
         conn.release();
-        return 401;
+        return 403;
     }
     else {
         const photo_exists = 'select photo_filename from User where user_id = ?';
         const does_photo = await conn.query(photo_exists, [userId]);
         if (does_photo[0][0].photo_filename == null) {
-            const create = 'update User set photo_filename = ? where user_id = ?';
+            const replace = 'update User set photo_filename = ? where user_id = ?';
             const replaced = await conn.query(replace, [file_name, userId])
             conn.release();
             return 201;

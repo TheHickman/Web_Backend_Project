@@ -257,7 +257,7 @@ exports.postPhoto = async function(auth_token, pet_id, file_name) {
     const does_photo = await conn.query(photo_exists, [pet_id]);
     if (does_photo[0].length == 0) {
         console.log('here');
-        const create = 'update Petition set photo_filename = ? where petition_id = ?';
+        const replace = 'update Petition set photo_filename = ? where petition_id = ?';
         const replaced = await conn.query(replace, [file_name, pet_id])
         conn.release();
         return 201;
