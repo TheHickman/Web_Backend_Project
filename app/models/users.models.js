@@ -161,3 +161,29 @@ exports.putPhoto = async function(userId, auth_token, file_name) {
         conn.release();
     }
 };
+
+exports.removePhoto = async function(userId, auth_token) {
+    const conn = await db.getPool().getConnection();
+    if (auth_token.length == 0) {
+        conn.release();
+        return 401;
+    }
+    const exists = 'select * from User where user_id = ?';
+    const does_it = await conn.query(exists, [userId]);
+    if (does_it[0].length == 0) {
+        conn.release();
+        return 404;
+    }
+    const correct_user = 'select user_id from User where auth_token = ?';
+    const user_result = await conn.query(correct_user, [auth_token]);
+    if (user_result[0][0].user_id != userId) {
+        conn.release();
+        return 403;
+    }
+    else {
+        const remove = 'update User set photo_filename = NULL where user_id = ?'
+        const removed = await conn.query(remove, [userId])
+        conn.release();
+        return 200;
+    }
+};
