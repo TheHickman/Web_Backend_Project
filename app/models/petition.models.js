@@ -255,14 +255,14 @@ exports.postPhoto = async function(auth_token, pet_id, file_name) {
     }
     const photo_exists = 'select photo_filename from Petition where petition_id = ?';
     const does_photo = await conn.query(photo_exists, [pet_id]);
-    if (does_photo[0].length == 0) {
+    if (does_photo[0][0].photo_filename == null) {
         console.log('here');
         const replace = 'update Petition set photo_filename = ? where petition_id = ?';
         const replaced = await conn.query(replace, [file_name, pet_id])
         conn.release();
         return 201;
     }
-    if (does_photo[0].length == 1) {
+    else {
         const create = 'update Petition set photo_filename = ? where petition_id = ?';
         const created = await conn.query(create, [file_name, pet_id])
         conn.release();
