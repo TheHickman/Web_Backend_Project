@@ -127,6 +127,10 @@ exports.getPhoto = async function(userId) {
 
 exports.putPhoto = async function(userId, auth_token, file_name) {
     const conn = await db.getPool().getConnection();
+    if (auth_token.length == 0) {
+        conn.release();
+        return 401;
+    }
     const exists = 'select * from User where user_id = ?';
     const does_it = await conn.query(exists, [userId]);
     if (does_it[0].length == 0) {
