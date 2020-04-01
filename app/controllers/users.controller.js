@@ -144,7 +144,6 @@ exports.getPhoto = async function(req, res) {
     try {
         const user_id = req.params.id;
         const result = await user.getPhoto(user_id);
-        console.log(result);
         if (result == 404 || result == null) {
             res.status(404)
                 .send("Cannot find");
@@ -167,8 +166,51 @@ exports.getPhoto = async function(req, res) {
 };
 
 exports.putPhoto = async function(req, res) {
-    console.log("xd");
-    return null;
+    const mime_type = req.headers['content-type'];
+    let extension = mime.extension(mime_type);
+    if (extension == 'jpeg') {
+        extension = 'jpg';
+    }
+    if (extension != 'jpg' && extension != 'png' && extension != 'gif') {
+        res.status(400)
+            .send("bad request");
+    }
+    else {
+        try {
+            const auth_token = req.headers['x-authorization'];
+            const userId = req.params.id;
+            const file_name = userId + '.' + extension;
+            const result = await user.putPhoto(userId, auth_token, file_name);
+            if (result == 404) {
+                res.status(404)
+                    .send("not found");
+            }
+            if (result == 403) {
+                res.status(403)
+                    .send("Forbiden");
+            }
+            if (result == 401) {
+                res.status(401)
+                    .send("Unauthorised")
+            }
+            if (result == 200 || result == 201) {
+                const file_path = path.dirname(require.main.filename) + '/storage/photos/';
+                const stream = fs.createWriteStream(file_path + file_name);
+                req.pipe(stream);
+                if (result == 200) {
+                    res.status(200)
+                        .send("OK");
+                }
+                if (result == 201) {
+                    res.status(201)
+                        .send("created");
+                }
+            }
+        } catch (err) {
+            res.status(500)
+                .send("Internal Server Error");
+        }
+    }
 };
 
 exports.deletePhoto = async function(req, res) {
