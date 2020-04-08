@@ -157,6 +157,7 @@ exports.postSigs = async function(auth_token, pet_id) {
     const closing_date = is_closed[0][0].closing_date;
     let now = new Date();
     if (closing_date <= now) {
+        conn.release();
         return 403
     }
     const is_logged = 'select user_id from User where auth_token = ?';

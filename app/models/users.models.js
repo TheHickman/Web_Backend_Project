@@ -29,8 +29,8 @@ exports.login = async function(email, password){
     }
     const authorised = 'select user_id as userId, auth_token as token from User where auth_token = ?';
     const answer = await conn.query(authorised, [token]);
-    conn.release();
     return_vals = answer[0][0]
+    conn.release();
     return return_vals;
 };
 
@@ -68,7 +68,6 @@ exports.retrieve = async function(user_id, token){
         conn.release();
         return checked;
     }
-    conn.release();
 };
 
 exports.update = async function(auth_token, user_id, name, email, password, new_password, city, country) {
@@ -108,7 +107,6 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
         conn.release();
         return 1;
     }
-    conn.release();
 };
 
 exports.getPhoto = async function(userId) {
@@ -162,7 +160,6 @@ exports.putPhoto = async function(userId, auth_token, file_name) {
             conn.release();
             return 200;
         }
-        conn.release();
     }
 };
 
