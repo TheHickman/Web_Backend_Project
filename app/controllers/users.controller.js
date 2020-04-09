@@ -236,7 +236,10 @@ exports.deletePhoto = async function(req, res) {
                     .send("Unauthorised")
             }
             else {
-                console.log(result);
+                const file_path = path.dirname(require.main.filename) + '/storage/photos/';
+                fs.unlink(file_path + result, function (err) {
+                    if (err) res.status(404).send("not found");
+                });
                 res.status(200)
                     .send("OK")
             }
