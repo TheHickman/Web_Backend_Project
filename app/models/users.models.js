@@ -192,9 +192,12 @@ exports.removePhoto = async function(userId, auth_token) {
         return 403;
     }
     else {
-        const remove = 'update User set photo_filename = NULL where user_id = ?'
+        const fname = 'select photo_filename from User where user_id = ?';
+        const file_name = await conn.query(fname, [userId]);
+        const result = file_name[0][0].photo_filename;
+        const remove = 'update User set photo_filename = NULL where user_id = ?';
         const removed = await conn.query(remove, [userId])
         conn.release();
-        return 200;
+        return result;
     }
 };

@@ -235,7 +235,8 @@ exports.deletePhoto = async function(req, res) {
                 res.status(401)
                     .send("Unauthorised")
             }
-            if (result == 200) {
+            else {
+                console.log(result);
                 res.status(200)
                     .send("OK")
             }
