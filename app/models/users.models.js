@@ -114,7 +114,6 @@ exports.getPhoto = async function(userId) {
     const file_name = 'select photo_filename from User where user_id = ?';
     const process = await conn.query(file_name, [userId]);
     if (process[0].length == 0) {
-        console.log('hey');
         conn.release();
         return 404;
     }
