@@ -164,21 +164,11 @@ exports.putPhoto = async function(userId, auth_token, file_name) {
 
 exports.removePhoto = async function(userId, auth_token) {
     const conn = await db.getPool().getConnection();
-    if (auth_token.length == 0) {
-        conn.release();
-        return 401;
-    }
     const exists = 'select * from User where user_id = ?';
     const does_it = await conn.query(exists, [userId]);
     if (does_it[0].length == 0) {
         conn.release();
         return 404;
-    }
-    const auth_token_check = 'select auth_token from User where user_id = ?';
-    const auth_result = await conn.query(auth_token_check, [userId]);
-    if (auth_result[0][0].auth_token == null) {
-        conn.release();
-        return 401;
     }
     const correct_user = 'select user_id from User where auth_token = ?';
     const user_result = await conn.query(correct_user, [auth_token]);
