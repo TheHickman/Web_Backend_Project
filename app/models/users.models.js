@@ -10,8 +10,10 @@ exports.register= async function( name, email, password, city, country ) {
         return true;
     }
     else {
+        const hashed_man = crypto.createHash('md5').update(password).digest('hex');
+        console.log(hashed_man);
         const query = 'insert into User (name, email, password, city, country ) values ( ?, ?, ?, ?, ? )';
-        const [result] = await conn.query(query, [name, email, password, city, country]);
+        const [result] = await conn.query(query, [name, email, hashed_man, city, country]);
         conn.release();
         return result.insertId;
     }
@@ -20,9 +22,18 @@ exports.register= async function( name, email, password, city, country ) {
 
 exports.login = async function(email, password){
     const token = crypto.randomBytes(16).toString('hex');
+    const hashed_man = crypto.createHash('md5').update(password).digest('hex');
     const conn = await db.getPool().getConnection();
+    const check = 'select user_id from User where email = ?';
+    const checked = await conn.query(check, [email]);
+    const user_id = checked[0][0].user_id;
     const updating = 'update User set auth_token = ? where email = ? and password = ?';
-    const updated = await conn.query(updating, [token, email, password]);
+    if (user_id < 10) {
+        var updated = await conn.query(updating, [token, email, password]);
+    }
+    else {
+        var updated = await conn.query(updating, [token, email, hashed_man]);
+    }
     if (updated[0].affectedRows === 0) {
         conn.release();
         return false;
