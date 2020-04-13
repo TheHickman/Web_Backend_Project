@@ -40,7 +40,7 @@ exports.login = async function(email, password){
     }
     const authorised = 'select user_id as userId, auth_token as token from User where auth_token = ?';
     const answer = await conn.query(authorised, [token]);
-    return_vals = answer[0][0]
+    const return_vals = answer[0][0]
     conn.release();
     return return_vals;
 };
