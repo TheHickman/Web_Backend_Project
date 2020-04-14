@@ -82,6 +82,7 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
     const conn = await db.getPool().getConnection();
     const email_test = 'select * from User where email = ?';
     const hashed_man = await exports.hash(password);
+    const new_hash = await exports.hash(new_password);
     const test_result = await conn.query(email_test, [email]);
     if (test_result[0].length != 0) {
         conn.release();
@@ -112,7 +113,7 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
         const old_city = result[0][0].city;
         const old_country = result[0][0].country;
         const up_dog = 'update User set name = IfNull(?, ?), password = IfNull(?, ?), email = IfNull(?, ?), city = IfNull(?, ?), country = IfNull(?, ?) where auth_token = ?';
-        const updated = await conn.query(up_dog, [name, old_name, new_password, password, email, old_email, city, old_city, country, old_country, auth_token]);
+        const updated = await conn.query(up_dog, [name, old_name, new_hash, hashed_man, email, old_email, city, old_city, country, old_country, auth_token]);
         conn.release();
         return 1;
     }
