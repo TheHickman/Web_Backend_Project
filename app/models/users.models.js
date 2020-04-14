@@ -26,6 +26,9 @@ exports.login = async function(email, password){
     const conn = await db.getPool().getConnection();
     const check = 'select user_id from User where email = ?';
     const checked = await conn.query(check, [email]);
+    if (checked[0].length == 0) {
+        return false;
+    }
     const user_id = checked[0][0].user_id;
     const updating = 'update User set auth_token = ? where email = ? and password = ?';
     if (user_id < 10) {
