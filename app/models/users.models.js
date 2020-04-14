@@ -1,6 +1,11 @@
 const db = require('../../config/db');
 const crypto = require("crypto");
 
+exports.hash = async function (password) {
+    const hashed_man = crypto.createHash('md5').update(password).digest('hex');
+    return hashed_man;
+}
+
 exports.register= async function( name, email, password, city, country ) {
     const conn = await db.getPool().getConnection();
     const test = 'select * from User where email = ?';
@@ -10,7 +15,7 @@ exports.register= async function( name, email, password, city, country ) {
         return true;
     }
     else {
-        const hashed_man = crypto.createHash('md5').update(password).digest('hex');
+        const hashed_man = await exports.hash(password);
         console.log(hashed_man);
         const query = 'insert into User (name, email, password, city, country ) values ( ?, ?, ?, ?, ? )';
         const [result] = await conn.query(query, [name, email, hashed_man, city, country]);
@@ -24,19 +29,8 @@ exports.login = async function(email, password){
     const token = crypto.randomBytes(16).toString('hex');
     const hashed_man = crypto.createHash('md5').update(password).digest('hex');
     const conn = await db.getPool().getConnection();
-    const check = 'select user_id from User where email = ?';
-    const checked = await conn.query(check, [email]);
-    if (checked[0].length == 0) {
-        return false;
-    }
-    const user_id = checked[0][0].user_id;
     const updating = 'update User set auth_token = ? where email = ? and password = ?';
-    if (user_id < 10) {
-        var updated = await conn.query(updating, [token, email, password]);
-    }
-    else {
-        var updated = await conn.query(updating, [token, email, hashed_man]);
-    }
+    const updated = await conn.query(updating, [token, email, hashed_man]);
     if (updated[0].affectedRows === 0) {
         conn.release();
         return false;
