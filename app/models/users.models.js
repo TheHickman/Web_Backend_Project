@@ -27,7 +27,7 @@ exports.register= async function( name, email, password, city, country ) {
 
 exports.login = async function(email, password){
     const token = crypto.randomBytes(16).toString('hex');
-    const hashed_man = crypto.createHash('md5').update(password).digest('hex');
+    const hashed_man = await exports.hash(password);
     const conn = await db.getPool().getConnection();
     const updating = 'update User set auth_token = ? where email = ? and password = ?';
     const updated = await conn.query(updating, [token, email, hashed_man]);
@@ -81,13 +81,14 @@ exports.retrieve = async function(user_id, token){
 exports.update = async function(auth_token, user_id, name, email, password, new_password, city, country) {
     const conn = await db.getPool().getConnection();
     const email_test = 'select * from User where email = ?';
+    const hashed_man = await exports.hash(password);
     const test_result = await conn.query(email_test, [email]);
     if (test_result[0].length != 0) {
         conn.release();
         return 2;
     }
     const select = 'select auth_token from User where user_id = ? and password = ?';
-    const checking = await conn.query(select, [user_id, password]);
+    const checking = await conn.query(select, [user_id, hashed_man]);
     if (checking[0].length == 0) {
         conn.release();
         return false;
