@@ -1,6 +1,6 @@
 const db = require('../../config/db');
 const fs = require('mz/fs');
-const passwords = require('./user.model'); //will this work for hashing? Hope so!!
+const passwords = require('./users.models'); //will this work for hashing? Hope so!!
 const photoDirectory = './storage/photos/';
 const defaultPhotoDirectory = './storage/default/';
 
