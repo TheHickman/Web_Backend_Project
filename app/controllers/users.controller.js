@@ -124,15 +124,15 @@ exports.update = async function(req, res){
                 .send("Toekn is invalid");
         }
         const result = await user.update(auth_token, user_id, name, email, password, new_password, city, country);
-        if (result == false) {
+        if (result == 401) {
             res.status(401)
                 .send("Not allowed");
         }
-        if (result == 2) {
+        if (result == 400) {
             res.status(400)
                 .send("Email in use");
         }
-        if (result == 3) {
+        if (result == 403) {
             res.status(403)
                 .send("Wrong user");
         }

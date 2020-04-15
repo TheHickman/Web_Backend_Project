@@ -86,24 +86,24 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
     const test_result = await conn.query(email_test, [email]);
     if (test_result[0].length != 0) {
         conn.release();
-        return 2;
+        return 400;
     }
     const select = 'select auth_token from User where user_id = ? and password = ?';
     const checking = await conn.query(select, [user_id, hashed_man]);
     if (checking[0].length == 0) {
         conn.release();
-        return false;
+        return 401;
     }
     if (checking[0][0].auth_token != auth_token) {
         conn.release();
-        return false;
+        return 401;
     }
 
     const correct_user = 'select user_id from User where auth_token = ?';
     const user_result = await conn.query(correct_user, [auth_token]);
     if (user_result[0][0].user_id != user_id) {
         conn.release();
-        return 3;
+        return 403;
     }
     else {
         const test = 'select * from User where auth_token = ?';
@@ -115,7 +115,7 @@ exports.update = async function(auth_token, user_id, name, email, password, new_
         const up_dog = 'update User set name = IfNull(?, ?), password = IfNull(?, ?), email = IfNull(?, ?), city = IfNull(?, ?), country = IfNull(?, ?) where auth_token = ?';
         const updated = await conn.query(up_dog, [name, old_name, new_hash, hashed_man, email, old_email, city, old_city, country, old_country, auth_token]);
         conn.release();
-        return 1;
+        return 200;
     }
 };
 
