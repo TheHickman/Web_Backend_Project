@@ -45,7 +45,7 @@ exports.insert = async function(auth_token, title, description, categoryId, crea
     const user_table = await conn.query(query, [auth_token] );
     if (user_table[0].length == 0) {
         conn.release();
-        return 66;
+        return 401;
 
     }
     const insertion = "insert into Petition (author_id, category_id, closing_date, created_date, description, title)  VALUES (?, ?, ?, ?, ?, ?)";
@@ -75,17 +75,17 @@ exports.alter = async function(pet_id, auth_token, title, description, categoryI
     const is_logged = await conn.query(user, [auth_token])
     if (is_logged[0].length == 0) {
         conn.release();
-        return "Token bad";
+        return 401;
     }
     const is_petition = "select author_id from Petition where petition_id = ?";
     const belongs = await conn.query(is_petition, [pet_id]);
     if (belongs[0].length == 0) {
         conn.release();
-        return "Not found";
+        return 404;
     }
     if (is_logged[0][0].user_id != belongs[0][0].author_id) {
         conn.release();
-        return "Not yours";
+        return 403;
     }
     const test = 'select * from Petition where petition_id = ?';
     const result = await conn.query(test, [pet_id]);
@@ -97,7 +97,7 @@ exports.alter = async function(pet_id, auth_token, title, description, categoryI
     if (old_closing_date != null) {
         if (old_closing_date <= now) {
             conn.release();
-            return "Not allowed";
+            return 400;
         }
     }
     const up_dog = 'update Petition set title = IfNull(?, ?), category_id = IfNull(?, ?), description = IfNull(?, ?), closing_date = IfNull(?, ?) where petition_id = ?';
@@ -111,17 +111,17 @@ exports.remove = async function(pet_id, auth_token){
     const is_logged = await conn.query(is_u, [auth_token])
     if (is_logged[0].length == 0) {
         conn.release();
-        return "Token bad";
+        return 401;
     }
     const is_petition = "select author_id from Petition where petition_id = ?";
     const belongs = await conn.query(is_petition, [pet_id]);
     if (belongs[0].length == 0) {
         conn.release();
-        return "Not found";
+        return 404;
     }
     if (is_logged[0][0].user_id != belongs[0][0].author_id) {
         conn.release();
-        return "Not yours";
+        return 403;
     }
     const query = 'DELETE from Petition where petition_id = ?';
     const result = await conn.query(query, [pet_id]);

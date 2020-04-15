@@ -89,7 +89,7 @@ exports.create = async function(req, res){
     try {
         const auth_token = req.headers['x-authorization'];
         const result = await petitions.insert(auth_token, title, description, categoryId, now, closingDate);
-        if (result == 66) {
+        if (result == 401) {
             res.status(401)
                 .send("Wrong user");
         }
@@ -150,19 +150,19 @@ exports.update = async function(req, res){
     }
     try {
         const result = await petitions.alter(pet_id, auth_token, title, description, categoryId, closingDate);
-        if (result == "Not allowed") {
+        if (result == 400) {
             res.status(400)
                 .send("Future");
         }
-        if (result == "Token bad") {
+        if (result == 401) {
             res.status(401)
                 .send("No");
         }
-        if (result == "Not yours") {
+        if (result == 403) {
             res.status(403)
                 .send("Not your petition");
         }
-        if (result == "Not found") {
+        if (result == 404) {
             res.status(404)
                 .send("Petition not found");
         }
@@ -180,15 +180,15 @@ exports.delete = async function(req, res){
     const auth_token = req.headers['x-authorization'];
     try {
         const result = await petitions.remove(pet_id, auth_token);
-        if (result == "Token bad") {
+        if (result == 401) {
             res.status(401)
                 .send("Unauthorised");
         }
-        if (result == "Not yours") {
+        if (result == 403) {
             res.status(403)
                 .send("Forbidden");
         }
-        if (result == "Not found") {
+        if (result == 404) {
             res.status(404)
                 .send("Not found");
         }
