@@ -12,7 +12,7 @@ exports.register= async function( name, email, password, city, country ) {
     const test_result = await conn.query(test, [email]);
     if (test_result[0].length != 0) {
         conn.release();
-        return true;
+        return 400;
     }
     else {
         const hashed_man = await exports.hash(password);
@@ -33,7 +33,7 @@ exports.login = async function(email, password){
     const updated = await conn.query(updating, [token, email, hashed_man]);
     if (updated[0].affectedRows === 0) {
         conn.release();
-        return false;
+        return 400;
     }
     const authorised = 'select user_id as userId, auth_token as token from User where auth_token = ?';
     const answer = await conn.query(authorised, [token]);
@@ -48,7 +48,7 @@ exports.logout = async function(token) {
     const updated = await conn.query(update, [token]);;
     if (updated[0].affectedRows == 0) {
         conn.release();
-        return true;
+        return 401;
     }
     conn.release();
     return updated;

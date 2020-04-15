@@ -27,7 +27,7 @@ exports.register = async function( req, res ) {
                 .send("Name len is 0");
         }
         const result = await user.register(name, email, password, city, country  );
-        if (result == true) {
+        if (result == 400) {
             res.status(400)
                 .send("Email already in use");
         }
@@ -50,7 +50,7 @@ exports.login = async function(req, res){
                 .send("Invalid Email or Passowrd");
         }
         const result = await user.login(email, password);
-        if (result === false) {
+        if (result === 400) {
             res.status(400)
                 .send("Invaid Email or Password");
         }
@@ -66,12 +66,12 @@ exports.logout = async function(req, res){
     try {
         const auth_token = req.headers['x-authorization'];
         const result = await user.logout(auth_token);
-        if (result == true) {
+        if (result == 401) {
             res.status(401)
                 .send("Unauthorised")
         }
         res.status(200)
-            .send("Logged out yeet");
+            .send("Logged out");
         } catch (err) {
             res.status(500)
                 .send("Internal Server Error");
