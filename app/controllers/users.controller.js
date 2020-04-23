@@ -18,13 +18,33 @@ exports.register = async function( req, res ) {
             res.status(400)
                 .send("Email must constain @");
         }
-        if (password.length === 0) {
+        if (password.length === 0 || typeof password != 'string') {
             res.status(400)
-                .send("Password len cannot be nothing");
+                .send("Password bad");
         }
-        if (name == null) {
+        if (typeof city != 'string' && typeof city != 'undefined') {
             res.status(400)
-                .send("Name len is 0");
+                .send("No");
+        }
+        if (typeof country != 'string' && typeof country != 'undefined') {
+            res.status(400)
+                .send("No");
+        }
+        if (typeof city == 'string') {
+            if (city.length < 1) {
+                res.status(400).send("Bad city");
+            }
+        }
+        if (typeof country == 'string') {
+            if (country.length < 1) {
+                res.status(400)
+                    .send("Bad country")
+            }
+        }
+        console.log(typeof city);
+        if (name.length == 0 || typeof name != 'string') {
+            res.status(400)
+                .send("Invalid data type");
         }
         const result = await user.register(name, email, password, city, country  );
         if (result == 400) {
