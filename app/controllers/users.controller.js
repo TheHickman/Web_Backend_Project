@@ -22,6 +22,22 @@ exports.register = async function( req, res ) {
             res.status(400)
                 .send("Password len cannot be nothing");
         }
+        if (typeof city != 'undefined' && typeof city != 'string') {
+            res.status(400)
+                .send('no');
+        }
+        if (typeof country != 'undefined' && typeof country != 'string') {
+            res.status(400)
+                .send('no');
+        }
+        if (typeof county == 'string' && country.length == 0) {
+            res.status(400)
+                .send('no');
+        }
+        if (typeof city == 'string' && city.length == 0) {
+            res.status(400)
+                .send('no');
+        }
         if (typeof name != 'string') {
             res.status(400)
                 .send("Name len is 0");
@@ -30,7 +46,6 @@ exports.register = async function( req, res ) {
             res.status(400)
                 .send("No");
         }
-        console.log('hi');
         const result = await user.register(name, email, password, city, country  );
         if (result == 400) {
             res.status(400)
