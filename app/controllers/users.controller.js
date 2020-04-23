@@ -65,9 +65,17 @@ exports.login = async function(req, res){
     try {
         const email = req.body.email;
         const password = req.body.password;
+        if (typeof email != "string") {
+            res.status(400)
+                .send("NO email");
+        }
         if (email.indexOf('@') === -1) {
             res.status(400)
                 .send("Invalid Email or Passowrd");
+        }
+        if (typeof password != "string") {
+            res.status(400)
+                .send("Invalid email or password");
         }
         const result = await user.login(email, password);
         if (result === 400) {
