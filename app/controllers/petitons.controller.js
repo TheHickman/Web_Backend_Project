@@ -1,6 +1,7 @@
 const petitions = require('../models/petition.models');
 const fs = require('mz/fs')
 var mime = require('mime-types')
+const crypto = require('crypto');
 const path = require('path')
 
 exports.lister = async function( req, res ) {
