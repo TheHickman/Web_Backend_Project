@@ -338,7 +338,7 @@ exports.putPhoto = async function(req, res) {
             }
             if (result == 200 || result == 201) {
                 const file_path = path.dirname(require.main.filename) + '/storage/photos/';
-                const stream = fs.createWriteStream(file_path + file_name);
+                const stream = await fs.createWriteStream(file_path + file_name);
                 req.pipe(stream);
                 if (result == 200) {
                     res.status(200)
