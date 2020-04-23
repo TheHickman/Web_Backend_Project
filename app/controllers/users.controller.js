@@ -170,6 +170,7 @@ exports.getPhoto = async function(req, res) {
 };
 
 exports.putPhoto = async function(req, res) {
+    const image = req.body;
     const mime_type = req.headers['content-type'];
     let extension = mime.extension(mime_type);
     if (extension == 'jpeg') {
@@ -183,7 +184,7 @@ exports.putPhoto = async function(req, res) {
         try {
             const auth_token = req.headers['x-authorization'];
             const userId = req.params.id;
-            const file_name = userId + '.' + extension;
+            const file_name = "user" + userId + '.' + extension;
             const result = await user.putPhoto(userId, auth_token, file_name);
             if (result == 404) {
                 res.status(404)
@@ -199,8 +200,7 @@ exports.putPhoto = async function(req, res) {
             }
             if (result == 200 || result == 201) {
                 const file_path = path.dirname(require.main.filename) + '/storage/photos/';
-                const stream = await fs.createWriteStream(file_path + file_name);
-                req.pipe(stream);
+                fs.writeFileSync(file_path + file_name, image);
                 if (result == 200) {
                     res.status(200)
                         .send("OK");
