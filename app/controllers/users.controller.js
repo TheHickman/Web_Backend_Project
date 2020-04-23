@@ -22,10 +22,15 @@ exports.register = async function( req, res ) {
             res.status(400)
                 .send("Password len cannot be nothing");
         }
-        if (name.length == 0) {
+        if (typeof name != 'string') {
             res.status(400)
                 .send("Name len is 0");
         }
+        if (typeof name == 'string' && name.length < 1) {
+            res.status(400)
+                .send("No");
+        }
+        console.log('hi');
         const result = await user.register(name, email, password, city, country  );
         if (result == 400) {
             res.status(400)
