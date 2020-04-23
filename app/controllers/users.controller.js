@@ -67,7 +67,7 @@ exports.login = async function(req, res){
         const password = req.body.password;
         if (typeof email != "string") {
             res.status(400)
-                .send("NO email");
+                .send("No");
         }
         if (email.indexOf('@') === -1) {
             res.status(400)
