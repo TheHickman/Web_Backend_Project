@@ -154,7 +154,7 @@ exports.getPhoto = async function(req, res) {
         }
         if (await fs.exists('./storage/photos/' + result)) {
             const image = await fs.readFile('./storage/photos/' + result);
-            const mimeType = mime.lookup('./storage/photos/' + result)
+            const mimeType = mime.lookup('./storage/photos/' + result);
             const image_dict = {image, mimeType};
             res.status(200)
                 .contentType(image_dict.mimeType).send(image_dict.image);
@@ -200,6 +200,7 @@ exports.putPhoto = async function(req, res) {
             if (result == 200 || result == 201) {
                 const file_path = path.dirname(require.main.filename) + '/storage/photos/';
                 const stream = fs.createWriteStream(file_path + file_name);
+                stream.end();
                 req.pipe(stream);
                 if (result == 200) {
                     res.status(200)
