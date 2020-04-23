@@ -323,7 +323,7 @@ exports.putPhoto = async function(req, res) {
     }
     else {
         try {
-            const file_name = "petition" + pet_id + '.' + extension;
+            const file_name = "petition" + pet_id + "_" + crypto.randomBytes(8).toString('hex') + '.' + extension;
             const result = await petitions.postPhoto(auth_token, pet_id, file_name);
             if (result == 404) {
                 res.status(404)

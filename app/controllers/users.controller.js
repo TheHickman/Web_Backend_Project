@@ -204,7 +204,7 @@ exports.putPhoto = async function(req, res) {
         try {
             const auth_token = req.headers['x-authorization'];
             const userId = req.params.id;
-            const file_name = "user" + userId + '.' + extension;
+            const file_name = "user" + userId + "_" + crypto.randomBytes(8).toString('hex') + '.' + extension;
             const result = await user.putPhoto(userId, auth_token, file_name);
             if (result == 404) {
                 res.status(404)
