@@ -41,8 +41,7 @@ exports.register = async function( req, res ) {
                     .send("Bad country")
             }
         }
-        console.log(typeof city);
-        if (name.length == 0 || typeof name != 'string') {
+        if (name.length == 0 || typeof name != 'string' || typeof name == 'undefined') {
             res.status(400)
                 .send("Invalid data type");
         }
